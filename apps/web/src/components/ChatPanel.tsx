@@ -19,41 +19,19 @@ export interface UiMessage {
 interface Props {
   conversation: Conversation;
   onConversationUpdated: (conv: Conversation) => void;
+  model: string;
 }
 
-export function ChatPanel({ conversation, onConversationUpdated }: Props) {
+export function ChatPanel({ conversation, onConversationUpdated, model }: Props) {
   const prism = useMemo(() => createPrismClient(), []);
-  const [models, setModels] = useState<string[]>([]);
-  const [model, setModel] = useState('');
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingModels, setLoadingModels] = useState(true);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef(conversation);
   convRef.current = conversation;
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await prism.models.list();
-        if (cancelled) return;
-        const ids = res.data.map((m) => m.id);
-        setModels(ids);
-        setModel((prev) => (prev && ids.includes(prev) ? prev : ids[0] ?? ''));
-      } catch (e) {
-        if (!cancelled) setError(formatPrismError(e));
-      } finally {
-        if (!cancelled) setLoadingModels(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [prism]);
 
   useEffect(() => {
     let cancelled = false;
@@ -172,20 +150,11 @@ export function ChatPanel({ conversation, onConversationUpdated }: Props) {
       <header className="chat-header">
         <h1>{conversation.title}</h1>
         <p className="subtitle">A-layer navigation client → Prism Gateway</p>
-        <label className="model-row">
-          Model
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            disabled={loadingModels || streaming}
-          >
-            {models.map((id) => (
-              <option key={id} value={id}>
-                {id}
-              </option>
-            ))}
-          </select>
-        </label>
+        {model && (
+          <p className="active-model">
+            Active model: <code>{model}</code>
+          </p>
+        )}
       </header>
 
       {error && (

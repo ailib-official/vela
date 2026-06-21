@@ -8,10 +8,10 @@
 }
 
 .app.layout {
-  max-width: 56rem;
+  max-width: 72rem;
   flex-direction: row;
   align-items: stretch;
-  gap: 1rem;
+  gap: 0.75rem;
   padding: 0.75rem;
 }
 
@@ -158,20 +158,261 @@
   font-size: 0.875rem;
 }
 
-.model-row {
+.active-model {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: #8b9cb3;
+}
+
+.active-model code {
+  color: #c5d4e8;
+  font-size: 0.85rem;
+}
+
+.provider-nav {
+  width: 15rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-left: 1px solid #2a3544;
+  padding-left: 0.75rem;
+  min-height: 0;
+}
+
+.provider-nav.collapsed .provider-cards {
+  display: none;
+}
+
+.provider-nav-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.provider-nav-header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.provider-nav-header > div:first-child {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem;
 }
 
-.model-row select {
-  flex: 1;
-  padding: 0.35rem 0.5rem;
+.provider-nav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.sort-row select {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.35rem;
   border-radius: 6px;
   border: 1px solid #2a3544;
   background: #1a2332;
   color: inherit;
+}
+
+.collapse-toggle,
+.refresh-btn {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid #2a3544;
+  background: #1a2332;
+  color: inherit;
+  cursor: pointer;
+}
+
+.refresh-btn {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.offline-pill {
+  font-size: 0.65rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: #3d1f24;
+  color: #f5b8be;
+  border: 1px solid #8b3a42;
+}
+
+.provider-nav-error {
+  color: #f5b8be;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.provider-cards {
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+}
+
+.provider-card {
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: #141c28;
+}
+
+.provider-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+}
+
+.provider-card-head h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-badge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.status-badge.healthy {
+  background: #1a3d2e;
+  color: #8fd4a8;
+}
+
+.status-badge.degraded {
+  background: #3d3520;
+  color: #e8c87a;
+}
+
+.status-badge.down,
+.status-badge.unknown {
+  background: #3d1f24;
+  color: #f5b8be;
+}
+
+.provider-metrics {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.35rem 0;
+  font-size: 0.65rem;
+  color: #8b9cb3;
+}
+
+.provider-metrics dt {
+  display: inline;
+  margin: 0;
+}
+
+.provider-metrics dd {
+  display: inline;
+  margin: 0 0 0 0.2rem;
+  color: #c5d4e8;
+}
+
+.no-models {
+  margin: 0.25rem 0 0;
+  font-size: 0.7rem;
+  color: #6b7d94;
+}
+
+.model-list {
+  list-style: none;
+  margin: 0.35rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.model-btn {
+  width: 100%;
+  text-align: left;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: #1a2332;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+
+.model-btn:hover:not(:disabled) {
+  border-color: #2a3544;
+}
+
+.model-btn.active {
+  border-color: #3d7dd6;
+  background: #1e3a5f;
+}
+
+.model-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.model-id {
+  display: block;
+  word-break: break-word;
+}
+
+.model-meta {
+  display: block;
+  font-size: 0.6rem;
+  color: #6b7d94;
+  margin-top: 0.1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .app.layout {
+    flex-direction: column;
+    max-width: 100%;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #2a3544;
+    padding-right: 0;
+    padding-bottom: 0.75rem;
+    max-height: 10rem;
+  }
+
+  .provider-nav {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #2a3544;
+    padding-left: 0;
+    padding-top: 0.75rem;
+    order: -1;
+  }
+
+  .provider-cards {
+    max-height: 14rem;
+  }
 }
 
 .error-banner {

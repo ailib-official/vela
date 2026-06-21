@@ -60,13 +60,16 @@ pnpm test
 
 ## Publish prism-sdk
 
+**CI (recommended):** set `NPM_TOKEN` on `ailib-official/vela`, then:
+
 ```bash
-cd packages/prism-sdk
-pnpm build
-npm publish --access public
+git tag prism-sdk-v0.1.0
+git push origin prism-sdk-v0.1.0
 ```
 
-Requires `NPM_TOKEN` with `@ailib-official` scope.
+Or use **Actions → Publish prism-sdk → Run workflow**.
+
+**Local:** `cd packages/prism-sdk && pnpm build && npm publish --access public` (requires `@ailib-official` npm token).
 
 ## License
 

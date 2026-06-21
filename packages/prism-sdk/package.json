@@ -25,7 +25,8 @@
     "dev": "tsup --watch",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "tsc -p tsconfig.json --noEmit"
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "pnpm run lint && pnpm test && pnpm build"
   },
   "repository": {
     "type": "git",

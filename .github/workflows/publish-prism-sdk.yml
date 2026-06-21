@@ -1,0 +1,59 @@
+# Publish `@ailib-official/prism-sdk` on tag `prism-sdk-v*` or manual dispatch.
+# Prereq: repo secret NPM_TOKEN (@ailib-official scope).
+
+name: Publish prism-sdk
+
+on:
+  push:
+    tags:
+      - 'prism-sdk-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (must match packages/prism-sdk/package.json)'
+        required: true
+        default: '0.1.0'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/prism-sdk
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install workspace deps
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}
+
+      - name: Test and build
+        run: |
+          pnpm test
+          pnpm build
+
+      - name: Verify package version (tag push)
+        if: startsWith(github.ref, 'refs/tags/prism-sdk-v')
+        run: |
+          TAG_VER="${GITHUB_REF#refs/tags/prism-sdk-v}"
+          PKG_VER=$(node -p "require('./package.json').version")
+          if [ "$TAG_VER" != "$PKG_VER" ]; then
+            echo "Tag version prism-sdk-v$TAG_VER does not match package.json $PKG_VER"
+            exit 1
+          fi
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public

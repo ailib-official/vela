@@ -1,0 +1,21 @@
+name: Smoke prism-sdk
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ailib-official/prism-sdk build
+      - name: Production smoke
+        env:
+          PRISM_API_KEY: ${{ secrets.PRISM_API_KEY }}
+        run: node scripts/smoke-prism.mjs

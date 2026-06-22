@@ -173,15 +173,12 @@ export default function App() {
         {mode === 'chat' ? (
 
           <ChatPanel
-
             key={conversation.id}
-
             conversation={conversation}
-
             model={selectedModel}
-
+            availableModels={availableModels}
+            onApplyModel={setSelectedModel}
             onConversationUpdated={handleConversationUpdated}
-
           />
 
         ) : (

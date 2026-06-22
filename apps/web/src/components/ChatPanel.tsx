@@ -9,6 +9,8 @@ import {
   type Conversation,
   type StoredMessage,
 } from '../lib/db';
+import { useWasmRouting } from '../hooks/useWasmRouting';
+import { RoutingHintBar } from './RoutingHintBar';
 
 export interface UiMessage {
   id: string;
@@ -20,10 +22,19 @@ interface Props {
   conversation: Conversation;
   onConversationUpdated: (conv: Conversation) => void;
   model: string;
+  availableModels: string[];
+  onApplyModel: (modelId: string) => void;
 }
 
-export function ChatPanel({ conversation, onConversationUpdated, model }: Props) {
+export function ChatPanel({
+  conversation,
+  onConversationUpdated,
+  model,
+  availableModels,
+  onApplyModel,
+}: Props) {
   const prism = useMemo(() => createPrismClient(), []);
+  const { wasm, wasmLoading } = useWasmRouting();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<UiMessage[]>([]);
   const [streaming, setStreaming] = useState(false);
@@ -184,6 +195,15 @@ export function ChatPanel({ conversation, onConversationUpdated, model }: Props)
           void send();
         }}
       >
+        <RoutingHintBar
+          prompt={input}
+          availableModels={availableModels}
+          currentModel={model}
+          wasm={wasm}
+          wasmLoading={wasmLoading}
+          onApply={onApplyModel}
+        />
+        <div className="composer-row">
         <textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -200,6 +220,7 @@ export function ChatPanel({ conversation, onConversationUpdated, model }: Props)
         <button type="submit" disabled={streaming || !input.trim() || !model}>
           {streaming ? 'Streaming…' : 'Send'}
         </button>
+        </div>
       </form>
     </div>
   );

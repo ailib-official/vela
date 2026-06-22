@@ -11,6 +11,7 @@ import {
 } from '../lib/db';
 import { useWasmRouting } from '../hooks/useWasmRouting';
 import { RoutingHintBar } from './RoutingHintBar';
+import { SmartRoutingBanner } from './SmartRoutingBanner';
 
 export interface UiMessage {
   id: string;
@@ -167,6 +168,8 @@ export function ChatPanel({
           </p>
         )}
       </header>
+
+      <SmartRoutingBanner />
 
       {error && (
         <div className="error-banner" role="alert">

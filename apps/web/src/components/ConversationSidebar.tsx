@@ -7,12 +7,14 @@ import {
   type Conversation,
 } from '../lib/db';
 import { conversationToMarkdown, downloadMarkdown } from '../lib/export';
+import { SyncPanel } from './SyncPanel';
 
 interface Props {
   activeId: string | null;
   onSelect: (conv: Conversation) => void;
   onNew: (conv: Conversation) => void;
   refreshKey: number;
+  onSynced?: () => void;
 }
 
 export function ConversationSidebar({
@@ -20,6 +22,7 @@ export function ConversationSidebar({
   onSelect,
   onNew,
   refreshKey,
+  onSynced,
 }: Props) {
   const [items, setItems] = useState<Conversation[]>([]);
   const [query, setQuery] = useState('');
@@ -102,6 +105,12 @@ export function ConversationSidebar({
           </li>
         ))}
       </ul>
+      <SyncPanel
+        onSynced={async () => {
+          await load();
+          onSynced?.();
+        }}
+      />
     </aside>
   );
 }

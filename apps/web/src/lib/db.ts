@@ -127,3 +127,38 @@ export function titleFromFirstUserMessage(content: string): string {
   const line = content.trim().split(/\n/)[0] ?? 'New chat';
   return line.length > 48 ? `${line.slice(0, 48)}…` : line;
 }
+
+export async function exportConversationSnapshot(
+  conversationId: string,
+): Promise<{ conversation: Conversation; messages: StoredMessage[] } | null> {
+  const db = await openDb();
+  const conv = await new Promise<Conversation | undefined>((resolve, reject) => {
+    const req = db.transaction('conversations', 'readonly').objectStore('conversations').get(conversationId);
+    req.onsuccess = () => resolve(req.result as Conversation | undefined);
+    req.onerror = () => reject(req.error);
+  });
+  if (!conv) return null;
+  const messages = await getMessages(conversationId);
+  return { conversation: conv, messages };
+}
+
+export async function importConversationSnapshot(
+  conversation: Conversation,
+  messages: StoredMessage[],
+): Promise<void> {
+  const db = await openDb();
+  const tx = db.transaction(['conversations', 'messages'], 'readwrite');
+  tx.objectStore('conversations').put(conversation);
+  const msgStore = tx.objectStore('messages');
+  const idx = msgStore.index('conversationId');
+  const keysReq = idx.getAllKeys(conversation.id);
+  await new Promise<void>((resolve, reject) => {
+    keysReq.onsuccess = () => {
+      for (const key of keysReq.result) msgStore.delete(key);
+      for (const m of messages) msgStore.put(m);
+      resolve();
+    };
+    keysReq.onerror = () => reject(keysReq.error);
+  });
+  await txDone(tx);
+}

@@ -138,6 +138,74 @@
   color: #e8ecf1;
 }
 
+.sync-panel {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #2a3544;
+  flex-shrink: 0;
+}
+
+.sync-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.8rem;
+}
+
+.sync-hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.65rem;
+  color: #6b7d94;
+}
+
+.sync-warn {
+  margin: 0 0 0.5rem;
+  font-size: 0.65rem;
+  color: #e8c87a;
+}
+
+.sync-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.7rem;
+  margin-bottom: 0.4rem;
+}
+
+.sync-field input {
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #2a3544;
+  background: #1a2332;
+  color: inherit;
+  font-size: 0.75rem;
+}
+
+.sync-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.sync-actions button {
+  flex: 1;
+  font-size: 0.7rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #2a3544;
+  background: #1a2332;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sync-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sync-status {
+  margin: 0.4rem 0 0;
+  font-size: 0.65rem;
+  color: #8fd4a8;
+}
+
 .chat-panel {
   display: flex;
   flex-direction: column;

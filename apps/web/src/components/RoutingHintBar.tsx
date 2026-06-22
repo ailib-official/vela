@@ -1,4 +1,5 @@
 import { suggestModel, type RoutingSuggestion } from '../lib/routingHint';
+import { smartRoutingStatusLabel } from '../lib/smartRouting';
 import type { WasmRuntime } from '../lib/wasmLoader';
 
 interface Props {
@@ -36,6 +37,7 @@ export function RoutingHintBar({
     <div className="routing-hint" role="status">
       <span>
         Suggested: <code>{suggestion.modelId}</code> — {suggestion.reason}
+        <span className="interim-badge">{smartRoutingStatusLabel()}</span>
         {suggestion.wasmActive && <span className="wasm-badge">WASM</span>}
       </span>
       <button type="button" onClick={() => onApply(suggestion.modelId)}>

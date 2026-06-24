@@ -1,28 +1,40 @@
-# Smart model routing (PR-V2-004) — design placeholder
+# Smart model routing (PR-V2-004 / PR-V2-005)
 
-> **Status**: Placeholder until Prism Phase 2 gate clears  
-> **Gate**: PT-073 (protocol RC) + PR-PP-002 (cost routing example) + Prism P2 billing  
-> **Interim**: PR-V2-003 WASM + TypeScript heuristics (`routingHint.ts`)
+> **Status**: **Prism P2 gate cleared** — `isSmartRoutingLive()` true (2026-06-24)  
+> **Soft gate**: PT-073 Contact metadata — still `false`; optional enrichment  
+> **Fallback**: PR-V2-003 WASM + TypeScript heuristics when decide API unavailable
 
 ## Goal
 
-Vela should eventually recommend models using **Prism smart routing** signals (latency, cost, health, usage), not only client-side heuristics.
+Vela recommends models using **Prism smart routing** signals (latency, cost, health), with client heuristics as fallback.
 
-## Current state (Phase 2 Wave 4 placeholder)
+## Gate checklist (updated 2026-06-24)
+
+| Gate | Task | Status |
+|------|------|--------|
+| `prPp002CostRouting` | PR-PP-002 + PR-P2-003 `/v1/route/decide` | ✅ Live |
+| `prismPhase2Billing` | PR-P2-004 billing + margin | ✅ Live |
+| `prismSmartRoutingGa` | PR-P2-005 cost \| latency \| balanced | ✅ Live |
+| `pt073ProtocolRc` | PT-073 protocol RC + Contact metadata | ⏳ Soft — not blocking |
+
+Implementation: `apps/web/src/lib/smartRouting.ts`
+
+> **NOT PRODUCTION SLA**: Cost/latency routing is best-effort until product SLA policies are published (see Prism `PR-PP-002`).
+
+## Current state
 
 | Layer | Capability | Status |
 |-------|------------|--------|
-| Client heuristics | `routingHint.ts` — length/code/cost | ✅ Live (PR-V2-003) |
-| WASM protocol | `ailib_invoke` capabilities gate | ✅ Live (PR-V2-003) |
-| Prism `/admin/health` | Provider latency/success (admin token) | Optional dev only |
-| Prism auto-route API | Server-side route decision | **Not live** (gated) |
+| Prism `/v1/route/decide` | Server-side route decision | ✅ Live (cost, latency, balanced) |
+| Prism billing | µUSD + margin | ✅ Live |
+| Client heuristics | `routingHint.ts` | ✅ Fallback |
+| WASM protocol | `ailib_invoke` capabilities | ✅ Live |
+| PT-073 Contact hints | ExecutionMetadata routing | ⏳ Future |
 
-## Future integration contract (draft)
-
-When Prism P2 exposes auto-routing (exact path TBD with gateway team):
+## Integration contract
 
 ```http
-POST /v1/route/decide
+POST https://api.prism.ailib.info/v1/route/decide
 Authorization: Bearer <gateway-key>
 Content-Type: application/json
 
@@ -32,46 +44,39 @@ Content-Type: application/json
 }
 ```
 
-Expected response:
+Response:
 
 ```json
 {
   "model": "deepseek-chat",
   "provider_id": "deepseek",
   "reason": "lowest_cost",
-  "fallback_chain": ["deepseek", "openai"]
+  "fallback_chain": ["deepseek", "groq"]
 }
 ```
 
-Vela client flow:
+Vela client flow (next PR — wire-up):
 
-1. User types prompt → call `decide` (or batch with debounce)
-2. Show recommendation in UI (replaces interim `RoutingHintBar` badge)
+1. User types prompt → call `decide` (debounced)
+2. Show recommendation in UI (`RoutingHintBar` — no longer Interim-only)
 3. On send, use returned `model` unless user overrides
-4. On 429/5xx from `classify_error` WASM helper → surface retryable + suggest fallback from `fallback_chain`
+4. On 429/5xx → WASM `classify_error` + `fallback_chain`
 
-## Dependencies
+## UI (this wave)
 
-| ID | Repo | Role |
-|----|------|------|
-| PT-073 | ai-protocol | Protocol RC for Contact/routing metadata |
-| PR-PP-002 | prism | Cost routing example (not production SLA) |
-| PR-P1-014 | ai-lib-gateway | Admin/usage surfaces (optional signals) |
+- `SmartRoutingBanner` — hidden when `isSmartRoutingLive()` (gate cleared)
+- `RoutingHintBar` — shows **Prism auto-routing** label
+- Feature gate: `smartRouting.ts` → `isSmartRoutingLive(): true`
 
-## UI stub (this PR)
+## Out of scope (follow-up)
 
-- `SmartRoutingBanner` — "Auto routing coming soon" with gate checklist
-- `RoutingHintBar` — labelled **Interim** until `isSmartRoutingLive()` is true
-- Feature flag: `smartRouting.ts` → `isSmartRoutingLive(): false`
-
-## Out of scope until gate clears
-
-- Calling a non-existent `/v1/route/decide` in production
-- Billing/quota integration (Prism P2)
-- Multi-tenant usage history on client
+- Production `decide` client call in ChatPanel (separate wire-up PR)
+- Pack manifest consumption (`PR-PP-001` schema only today)
+- PT-073 Contact metadata in decide request
 
 ## References
 
-- `apps/web/docs/WASM.md` — WASM asset refresh
-- `ai-lib-plans/active/projects/vela/PHASE2_PLAN.md` — Wave 4 gate
-- `ai-lib-plans/active/projects/prism/tasks/PR-PP-002-cost-routing-example.yaml`
+- `apps/web/docs/WASM.md`
+- `ai-lib-plans/active/projects/prism/PHASE2_PLAN.md`
+- `ai-lib-gateway/docs/COST_ROUTING.md`
+- Prism merges: gateway #10–#13, eos #14–#18, ai-protocol #10

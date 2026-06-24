@@ -10,8 +10,10 @@ import {
   type StoredMessage,
 } from '../lib/db';
 import { useWasmRouting } from '../hooks/useWasmRouting';
+import { usePrismRouteDecide } from '../hooks/usePrismRouteDecide';
 import { RoutingHintBar } from './RoutingHintBar';
 import { SmartRoutingBanner } from './SmartRoutingBanner';
+import { isSmartRoutingLive } from '../lib/smartRouting';
 
 export interface UiMessage {
   id: string;
@@ -41,6 +43,12 @@ export function ChatPanel({
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const historyForDecide = useMemo(
+    () => messages.map((m) => ({ role: m.role, content: m.content })),
+    [messages],
+  );
+  const { suggestion: prismSuggestion, loading: prismDecideLoading } =
+    usePrismRouteDecide(input, model, historyForDecide);
   const bottomRef = useRef<HTMLDivElement>(null);
   const convRef = useRef(conversation);
   convRef.current = conversation;
@@ -88,6 +96,16 @@ export function ChatPanel({
     const text = input.trim();
     if (!text || !model || streaming) return;
 
+    let sendModel = model;
+    if (
+      isSmartRoutingLive() &&
+      prismSuggestion &&
+      prismSuggestion.modelId !== model
+    ) {
+      sendModel = prismSuggestion.modelId;
+      onApplyModel(sendModel);
+    }
+
     setError(null);
     setInput('');
     const now = Date.now();
@@ -106,7 +124,7 @@ export function ChatPanel({
         conversationId: conversation.id,
         role: 'user',
         content: text,
-        model,
+        model: sendModel,
         timestamp: now,
       },
       text,
@@ -120,7 +138,7 @@ export function ChatPanel({
     let assistantText = '';
     try {
       const stream = prism.chat.completions.createStream({
-        model,
+        model: sendModel,
         messages: history,
       });
       for await (const chunk of stream) {
@@ -138,7 +156,7 @@ export function ChatPanel({
         conversationId: conversation.id,
         role: 'assistant',
         content: assistantText,
-        model,
+        model: sendModel,
         timestamp: Date.now(),
       });
     } catch (e) {
@@ -154,6 +172,8 @@ export function ChatPanel({
     prism,
     streaming,
     conversation.id,
+    prismSuggestion,
+    onApplyModel,
     onConversationUpdated,
   ]);
 
@@ -204,6 +224,8 @@ export function ChatPanel({
           currentModel={model}
           wasm={wasm}
           wasmLoading={wasmLoading}
+          prismSuggestion={prismSuggestion}
+          prismLoading={prismDecideLoading}
           onApply={onApplyModel}
         />
         <div className="composer-row">

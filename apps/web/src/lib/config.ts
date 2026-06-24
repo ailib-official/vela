@@ -25,6 +25,27 @@ export function createPrismClient(): PrismClient {
   });
 }
 
+/** HTTP connection for non-sdk endpoints (e.g. `/v1/route/decide`). */
+export function getPrismHttpConfig(): { baseUrl: string; apiKey: string } {
+  const apiKey = import.meta.env.VITE_PRISM_API_KEY?.trim();
+  if (!apiKey) {
+    throw new Error(
+      'Missing VITE_PRISM_API_KEY. Copy apps/web/.env.example to .env.local',
+    );
+  }
+  const configured = import.meta.env.VITE_PRISM_BASE_URL?.trim();
+  const baseUrl = import.meta.env.DEV
+    ? configured ?? ''
+    : configured || DEFAULT_BASE_URL;
+  return { baseUrl, apiKey };
+}
+
+export function routeOptimizeMode(): 'cost' | 'latency' | 'balanced' {
+  const raw = import.meta.env.VITE_PRISM_ROUTE_OPTIMIZE?.trim().toLowerCase();
+  if (raw === 'latency' || raw === 'balanced') return raw;
+  return 'cost';
+}
+
 export function formatPrismError(err: unknown): string {
   if (err && typeof err === 'object' && 'status' in err) {
     const status = (err as { status: number }).status;

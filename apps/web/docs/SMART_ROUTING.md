@@ -62,15 +62,14 @@ Vela client flow (next PR — wire-up):
 3. On send, use returned `model` unless user overrides
 4. On 429/5xx → WASM `classify_error` + `fallback_chain`
 
-## UI (this wave)
+## UI (PR-V2-006)
 
-- `SmartRoutingBanner` — hidden when `isSmartRoutingLive()` (gate cleared)
-- `RoutingHintBar` — shows **Prism auto-routing** label
-- Feature gate: `smartRouting.ts` → `isSmartRoutingLive(): true`
+- `decideRoute.ts` + `usePrismRouteDecide` — debounced `POST /v1/route/decide`
+- `RoutingHintBar` — Prism suggestion when live; WASM/heuristic fallback on error
+- `ChatPanel` — applies server model on send when gate live
 
 ## Out of scope (follow-up)
 
-- Production `decide` client call in ChatPanel (separate wire-up PR)
 - Pack manifest consumption (`PR-PP-001` schema only today)
 - PT-073 Contact metadata in decide request
 

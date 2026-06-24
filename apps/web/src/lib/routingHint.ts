@@ -11,6 +11,10 @@ export interface RoutingSuggestion {
   modelId: string;
   reason: string;
   wasmActive: boolean;
+  /** `prism` when from `/v1/route/decide`; default heuristic */
+  source?: 'heuristic' | 'prism';
+  providerId?: string;
+  disclaimer?: string;
 }
 
 function largestContextModel(available: string[]): string | undefined {
@@ -64,5 +68,5 @@ export function suggestModel(
     }
   }
 
-  return { modelId, reason, wasmActive };
+  return { modelId, reason, wasmActive, source: 'heuristic' };
 }

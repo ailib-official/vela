@@ -1,12 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { isSmartRoutingLive, smartRoutingStatusLabel } from './smartRouting';
+import {
+  isSmartRoutingLive,
+  SMART_ROUTING_GATES,
+  smartRoutingStatusLabel,
+} from './smartRouting';
 
 describe('smartRouting', () => {
-  it('is not live until Prism P2 gates clear', () => {
-    expect(isSmartRoutingLive()).toBe(false);
+  it('is live after Prism P2 core gates (billing, cost route, smart routing GA)', () => {
+    expect(isSmartRoutingLive()).toBe(true);
+    expect(SMART_ROUTING_GATES.prPp002CostRouting).toBe(true);
+    expect(SMART_ROUTING_GATES.prismPhase2Billing).toBe(true);
+    expect(SMART_ROUTING_GATES.prismSmartRoutingGa).toBe(true);
   });
 
-  it('reports interim mode label', () => {
-    expect(smartRoutingStatusLabel()).toContain('Interim');
+  it('PT-073 remains soft (not required for isSmartRoutingLive)', () => {
+    expect(SMART_ROUTING_GATES.pt073ProtocolRc).toBe(false);
+    expect(isSmartRoutingLive()).toBe(true);
+  });
+
+  it('reports Prism auto-routing label when live', () => {
+    expect(smartRoutingStatusLabel()).toBe('Prism auto-routing');
   });
 });
